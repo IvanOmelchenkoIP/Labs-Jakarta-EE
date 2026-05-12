@@ -1,10 +1,14 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!doctype html>
 <html lang="uk">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Бригада — Jakarta EE</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="${pageContext.request.contextPath}/styles.css"
+    />
   </head>
   <body>
     <div class="container">
@@ -15,13 +19,20 @@
             Лабораторний проєкт команди: тема варіанту — система
             онлайн-голосування.
           </p>
+          <p class="lead">
+            <a
+              class="btn btn-primary"
+              href="${pageContext.request.contextPath}/voting"
+              >Перейти до голосування</a
+            >
+          </p>
           <img
             class="framework-img"
-            src="images/jakarta-logo.png"
+            src="${pageContext.request.contextPath}/images/jakarta-logo.png"
             alt="Логотип Jakarta EE"
           />
           <a
-            class="external-pill"
+            class="btn btn-secondary"
             href="https://jakarta.ee"
             target="_blank"
             rel="noopener"
@@ -36,25 +47,25 @@
           </p>
           <ul class="member-cards">
             <li>
-              <a href="member-chyrkov">
+              <a href="${pageContext.request.contextPath}/member-chyrkov">
                 <span class="avatar" aria-hidden="true">МЧ</span>
                 <span>Чирков Максим</span>
               </a>
             </li>
             <li>
-              <a href="member-kreslavskyi">
+              <a href="${pageContext.request.contextPath}/member-kreslavskyi">
                 <span class="avatar" aria-hidden="true">МК</span>
                 <span>Креславський Михайло</span>
               </a>
             </li>
             <li>
-              <a href="member-kushch">
+              <a href="${pageContext.request.contextPath}/member-kushch">
                 <span class="avatar" aria-hidden="true">АК</span>
                 <span>Кущ Артем</span>
               </a>
             </li>
             <li>
-              <a href="member-omelchenko">
+              <a href="${pageContext.request.contextPath}/member-omelchenko">
                 <span class="avatar" aria-hidden="true">ІО</span>
                 <span>Іван Омельченко</span>
               </a>
