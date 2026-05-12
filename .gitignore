@@ -22,3 +22,22 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Eclipse IDE Specific
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~
+.ninja_deps
+.ninja_log
+
+#Peoject settings
+.settings/
+.project
+.classpath
+
+# Eclipse Web
+.factorypath
