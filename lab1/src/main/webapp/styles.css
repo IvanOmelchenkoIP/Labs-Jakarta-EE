@@ -1,0 +1,119 @@
+@charset "UTF-8";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9f9f9;
+}
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.landing-section {
+    display: flex;
+    min-height: 80vh;
+    gap: 40px;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+}
+.left-panel, .right-panel {
+    flex: 1;
+}
+.framework-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+.member-list {
+    list-style: none;
+    margin-top: 15px;
+}
+.member-list li {
+    margin-bottom: 12px;
+}
+.member-list a {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.member-list a:hover {
+    text-decoration: underline;
+}
+
+.variant-section {
+    padding: 60px 0;
+}
+.entity-list {
+    margin: 15px 0 25px 20px;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.profile-divider {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid #333;
+    border-bottom: 2px solid #333;
+    padding: 15px 0;
+    margin: 20px 0;
+}
+.contacts-panel {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.contact-icon {
+    width: 32px;
+    height: 32px;
+    transition: transform 0.2s;
+}
+.contact-icon:hover {
+    transform: scale(1.1);
+}
+.back-link {
+    display: inline-block;
+    margin: 20px 0;
+    color: #666;
+    text-decoration: none;
+}
+.back-link:hover {
+    color: #000;
+}
+
+.contact-icon {
+  width: 24px;       
+  height: 24px;         
+  object-fit: contain; 
+  vertical-align: middle; 
+  margin: 0 5px;  
+}
+
+.site-footer {
+    margin-top: 60px;
+    padding: 20px 0;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
+}
+.site-footer a {
+    color: #555;
+    text-decoration: underline;
+}
+.site-footer a:hover {
+    color: #000;
+}
+
