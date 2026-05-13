@@ -33,7 +33,7 @@ public class VotingDetailServlet extends HttpServlet {
         }
         HttpSession session = request.getSession(true);
         boolean hasVoted = hasSessionVoted(session, id);
-        request.setAttribute("voting", voting);
+        request.setAttribute("voting", voting.get());
         request.setAttribute("hasVoted", hasVoted);
         request.getRequestDispatcher(WebConstants.VIEW_DETAIL).forward(request, response);
     }
