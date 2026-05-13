@@ -25,12 +25,20 @@ public class VotingVoteServlet extends HttpServlet {
         VotingService service = (VotingService) getServletContext().getAttribute(WebConstants.ATTR_VOTING_SERVICE);
 
         HttpSession session = request.getSession(true);
+        
+        Long userId = (Long) session.getAttribute("SESSION_USER_ID");
+        if (userId == null) {
+            userId = Math.abs(java.util.UUID.randomUUID().getMostSignificantBits());
+            session.setAttribute("SESSION_USER_ID", userId);
+        }
+
         if (VotingDetailServlet.hasSessionVoted(session, votingId)) {
             redirectWithNotice(request, response, votingId, "already");
             return;
         }
 
-        VoteResult result = service.castVote(votingId, candidateId);
+        VoteResult result = service.castVote(votingId, candidateId, userId);
+        
         switch (result) {
             case OK:
                 VotingDetailServlet.markSessionVoted(session, votingId);
@@ -44,6 +52,9 @@ public class VotingVoteServlet extends HttpServlet {
                 break;
             case INVALID_CANDIDATE:
                 redirectWithNotice(request, response, votingId, "badcandidate");
+                break;
+            case ALREADY_VOTED: 
+                redirectWithNotice(request, response, votingId, "already");
                 break;
             default:
                 redirectWithNotice(request, response, votingId, "error");

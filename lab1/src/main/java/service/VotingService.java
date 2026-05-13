@@ -1,6 +1,7 @@
 package service;
 
 import java.util.List;
+import java.util.Optional;
 
 import model.Voting;
 import model.VotingStatus;
@@ -9,11 +10,13 @@ public interface VotingService {
 
     List<Voting> findAll();
 
-    Voting findById(long id);
+    Optional<Voting> findById(long id);
 
-    VoteResult castVote(long votingId, long candidateId);
+    VoteResult castVote(long votingId, long candidateId, long userId);
 
     Voting createVoting(String title, String description, List<String> candidateNames, long ownerId);
 
     void updateStatus(long votingId, VotingStatus status);
+    
+    void deleteVoting(long id);
 }
