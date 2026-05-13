@@ -2,6 +2,7 @@ package controller.voting;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import controller.WebConstants;
@@ -25,8 +26,8 @@ public class VotingDetailServlet extends HttpServlet {
         String idParam = request.getParameter("id");
         long id = parseLongOrZero(idParam);
         VotingService service = (VotingService) getServletContext().getAttribute(WebConstants.ATTR_VOTING_SERVICE);
-        Voting voting = service.findById(id);
-        if (voting == null) {
+        Optional<Voting> voting = service.findById(id);
+        if (voting.isEmpty()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Голосування не знайдено");
             return;
         }
@@ -37,13 +38,13 @@ public class VotingDetailServlet extends HttpServlet {
         request.getRequestDispatcher(WebConstants.VIEW_DETAIL).forward(request, response);
     }
 
-    static boolean hasSessionVoted(HttpSession session, long votingId) {
+    public static boolean hasSessionVoted(HttpSession session, long votingId) {
         @SuppressWarnings("unchecked")
         Set<Long> voted = (Set<Long>) session.getAttribute(WebConstants.SESSION_VOTED_IDS);
         return voted != null && voted.contains(votingId);
     }
 
-    static void markSessionVoted(HttpSession session, long votingId) {
+    public static void markSessionVoted(HttpSession session, long votingId) {
         @SuppressWarnings("unchecked")
         Set<Long> voted = (Set<Long>) session.getAttribute(WebConstants.SESSION_VOTED_IDS);
         if (voted == null) {
