@@ -1,14 +1,12 @@
 package controller.api;
 
-import jakarta.servlet.ServletContext;
+import jakarta.ejb.EJB;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import controller.WebConstants;
 import dto.ErrorResponse;
 import dto.UpdateStatusRequest;
 import dto.VotingRequest;
@@ -28,102 +26,125 @@ import java.util.stream.Collectors;
 @Consumes(MediaType.APPLICATION_JSON)
 public class VotingHostApi {
 
-	@Context
-	private ServletContext servletContext;
+    @EJB
+    private VotingService service;
 
-	private VotingService getService() {
-		return (VotingService) servletContext.getAttribute(WebConstants.ATTR_VOTING_SERVICE);
-	}
+    @GET
+    public Response getAllVotings(
+            @QueryParam("status") VotingStatus statusFilter,
+            @QueryParam("page") @DefaultValue("1") int page, 
+            @QueryParam("size") @DefaultValue("10") int size) {
 
-	@GET
-	public Response getAllVotings(@QueryParam("status") VotingStatus statusFilter,
-			@QueryParam("page") @DefaultValue("1") int page, @QueryParam("size") @DefaultValue("10") int size) {
+        int validatedPage = Math.max(1, page);
+        int validatedSize = Math.max(1, size);
 
-		List<Voting> list = new ArrayList<>(getService().findAll());
-		list.sort(Comparator.comparingLong(Voting::getId));
+        List<Voting> list = new ArrayList<>(service.findAll());
+        list.sort(Comparator.comparingLong(Voting::getId));
 
-		if (statusFilter != null) {
-			list = list.stream().filter(v -> v.getStatus() == statusFilter).collect(Collectors.toList());
-		}
+        if (statusFilter != null) {
+            list = list.stream()
+                    .filter(v -> v.getStatus() == statusFilter)
+                    .collect(Collectors.toList());
+        }
 
-		int fromIndex = (page - 1) * size;
-		if (fromIndex >= list.size()) {
-			return Response.ok(new ArrayList<>()).build();
-		}
-		int toIndex = Math.min(fromIndex + size, list.size());
-		List<Voting> paginatedList = list.subList(fromIndex, toIndex);
+        int fromIndex = (validatedPage - 1) * validatedSize;
+        if (fromIndex >= list.size()) {
+            return Response.ok(new ArrayList<>()).build();
+        }
+        
+        int toIndex = Math.min(fromIndex + validatedSize, list.size());
+        List<Voting> paginatedList = list.subList(fromIndex, toIndex);
 
-		return Response.ok(paginatedList).build();
-	}
+        return Response.ok(paginatedList).build();
+    }
 
-	@POST
-	public Response createVoting(@HeaderParam("X-User-Id") Long ownerId, @Valid VotingRequest dto) {
-		if (ownerId == null) {
-			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ErrorResponse("Дія неможлива для неавторизованого користувача")).build();
-		}
+    @POST
+    public Response createVoting(@HeaderParam("X-User-Id") Long ownerId, @Valid VotingRequest dto) {
+        if (ownerId == null) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Дія неможлива для неавторизованого користувача"))
+                    .build();
+        }
 
-		Voting voting = getService().createVoting(dto.getTitle(),
-				dto.getDescription() != null ? dto.getDescription() : "", dto.getCandidates(), ownerId);
-		return Response.status(Status.CREATED).entity(voting).build();
-	}
+        Voting voting = service.createVoting(
+                dto.getTitle(),
+                dto.getDescription() != null ? dto.getDescription() : "", 
+                dto.getCandidates(), 
+                ownerId
+        );
+        return Response.status(Status.CREATED).entity(voting).build();
+    }
 
-	@PUT
-	@Path("/{id}/status")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateStatus(@PathParam("id") Long id, @HeaderParam("X-User-Id") Long ownerId,
-			@Valid UpdateStatusRequest dto) {
+    @PUT
+    @Path("/{id}/status")
+    public Response updateStatus(
+            @PathParam("id") Long id, 
+            @HeaderParam("X-User-Id") Long ownerId,
+            @Valid UpdateStatusRequest dto) {
 
-		if (ownerId == null) {
-			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ErrorResponse("Дія неможлива для неавторизованого користувача")).build();
-		}
+        if (ownerId == null) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Дія неможлива для неавторизованого користувача"))
+                    .build();
+        }
 
-		Optional<Voting> votingOpt = getService().findById(id);
+        Optional<Voting> votingOpt = service.findById(id);
 
-		if (votingOpt.isEmpty()) {
-			return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse("Голосування не знайдено"))
-					.build();
-		}
+        if (votingOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorResponse("Голосування не знайдено"))
+                    .build();
+        }
 
-		Voting voting = votingOpt.get();
-		if (!Objects.equals(voting.getOwnerId(), ownerId)) {
-			return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse("Доступ заборонено")).build();
-		}
+        Voting voting = votingOpt.get();
+        if (!Objects.equals(voting.getOwnerId(), ownerId)) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new ErrorResponse("Доступ заборонено"))
+                    .build();
+        }
 
-		String action = dto.getAction();
+        String action = dto.getAction();
+        VotingStatus newStatus = null;
 
-		if ("start".equalsIgnoreCase(action)) {
-			getService().updateStatus(id, VotingStatus.ACTIVE);
-		} else if ("stop".equalsIgnoreCase(action)) {
-			getService().updateStatus(id, VotingStatus.CLOSED);
-		}
+        if ("start".equalsIgnoreCase(action)) {
+            newStatus = VotingStatus.ACTIVE;
+        } else if ("stop".equalsIgnoreCase(action)) {
+            newStatus = VotingStatus.CLOSED;
+        }
 
-		return Response.ok(voting).build();
-	}
+        if (newStatus != null) {
+            service.updateStatus(id, newStatus);
+            voting.setStatus(newStatus);
+        }
 
-	@DELETE
-	@Path("/{id}")
-	public Response deleteVoting(@PathParam("id") Long id, @HeaderParam("X-User-Id") Long ownerId) {
-		if (ownerId == null) {
-			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ErrorResponse("Дія неможлива для неавторизованого користувача")).build();
-		}
+        return Response.ok(voting).build();
+    }
 
-		Optional<Voting> votingOpt = getService().findById(id);
+    @DELETE
+    @Path("/{id}")
+    public Response deleteVoting(@PathParam("id") Long id, @HeaderParam("X-User-Id") Long ownerId) {
+        if (ownerId == null) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Дія неможлива для неавторизованого користувача"))
+                    .build();
+        }
 
-		if (votingOpt.isEmpty()) {
-			return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse("Голосування не знайдено"))
-					.build();
-		}
+        Optional<Voting> votingOpt = service.findById(id);
 
-		Voting voting = votingOpt.get();
-		if (voting.getOwnerId() != ownerId) {
-			return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse("Доступ заборонено")).build();
-		}
+        if (votingOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorResponse("Голосування не знайдено"))
+                    .build();
+        }
 
-		getService().deleteVoting(id);
+        Voting voting = votingOpt.get();
+        if (!Objects.equals(voting.getOwnerId(), ownerId)) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new ErrorResponse("Доступ заборонено"))
+                    .build();
+        }
 
-		return Response.noContent().build();
-	}
+        service.deleteVoting(id);
+        return Response.noContent().build();
+    }
 }

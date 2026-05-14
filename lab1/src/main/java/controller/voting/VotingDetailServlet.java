@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import controller.WebConstants;
+import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,12 +21,14 @@ public class VotingDetailServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
+    @EJB
+    private VotingService service;
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
         long id = parseLongOrZero(idParam);
-        VotingService service = (VotingService) getServletContext().getAttribute(WebConstants.ATTR_VOTING_SERVICE);
         Optional<Voting> voting = service.findById(id);
         if (voting.isEmpty()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Голосування не знайдено");

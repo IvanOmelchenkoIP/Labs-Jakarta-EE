@@ -3,9 +3,11 @@ package service;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.ejb.Local;
 import model.Voting;
 import model.VotingStatus;
 
+@Local
 public interface VotingService {
 
     List<Voting> findAll();
@@ -19,4 +21,6 @@ public interface VotingService {
     void updateStatus(long votingId, VotingStatus status);
     
     void deleteVoting(long id);
+    
+    public boolean hasUserVoted(long votingId, long userId);
 }

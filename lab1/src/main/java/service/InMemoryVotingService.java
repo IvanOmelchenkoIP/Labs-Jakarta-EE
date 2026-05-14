@@ -9,10 +9,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
 import model.Candidate;
 import model.Voting;
 import model.VotingStatus;
 
+@Singleton
+@Startup
 public class InMemoryVotingService implements VotingService {
 
 	private final Map<Long, Voting> byId = new ConcurrentHashMap<>();
@@ -20,9 +25,9 @@ public class InMemoryVotingService implements VotingService {
 	private final AtomicLong idSeq = new AtomicLong(100);
 
 	public InMemoryVotingService() {
-		seedDemoData();
 	}
 
+	@PostConstruct
 	private void seedDemoData() {
 		long id1 = 1L;
 		Voting v1 = new Voting(id1, "Обрання представника бригади",
@@ -64,6 +69,7 @@ public class InMemoryVotingService implements VotingService {
 		return Optional.empty();
 	}
 
+	@Override
 	public boolean hasUserVoted(long votingId, long userId) {
 		Set<Long> users = votedUserIdsByVotingId.get(votingId);
 		return users != null && users.contains(userId);
