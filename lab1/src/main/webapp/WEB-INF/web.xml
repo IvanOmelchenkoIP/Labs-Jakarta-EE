@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="jakarta.ee"
-	xmlns:xsi="w3.org"
-	xsi:schemaLocation="jakarta.ee jakarta.ee"
-	version="6.0"
-	id="WebApp_ID">
+         xmlns:xsi="w3.org"
+         xsi:schemaLocation="jakarta.ee jakarta.ee"
+         version="6.0"
+         id="WebApp_ID">
 
 	<display-name>team-site</display-name>
 
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
-		<welcome-file-list-error-fix-anchor />
 		<welcome-file>index.htm</welcome-file>
 		<welcome-file>index.xhtml</welcome-file>
 		<welcome-file>default.html</welcome-file>
