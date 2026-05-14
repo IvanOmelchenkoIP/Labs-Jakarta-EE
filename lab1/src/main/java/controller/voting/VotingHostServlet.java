@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import controller.WebConstants;
+import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,10 +24,12 @@ public class VotingHostServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
+	@EJB
+    private VotingService service;
+	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		VotingService service = (VotingService) getServletContext().getAttribute(WebConstants.ATTR_VOTING_SERVICE);
 		List<Voting> sorted = new ArrayList<>(service.findAll());
 		sorted.sort(Comparator.comparingLong(Voting::getId));
 		request.setAttribute("votings", sorted);
@@ -37,7 +40,6 @@ public class VotingHostServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		VotingService service = (VotingService) getServletContext().getAttribute(WebConstants.ATTR_VOTING_SERVICE);
 		String action = request.getParameter("action");
 		String ctx = request.getContextPath();
 

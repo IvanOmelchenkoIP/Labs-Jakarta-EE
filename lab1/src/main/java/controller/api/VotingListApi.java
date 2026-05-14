@@ -1,12 +1,10 @@
 package controller.api;
 
-import jakarta.servlet.ServletContext;
+import jakarta.ejb.EJB;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import controller.WebConstants;
 import dto.PagedResponse;
 import model.Voting;
 import model.VotingStatus;
@@ -21,13 +19,16 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 public class VotingListApi {
 
-	@Context
-	private ServletContext servletContext;
+	@EJB
+	private VotingService service;
 
 	@GET
 	public Response getVotings(@QueryParam("title") String titleFilter, @QueryParam("status") VotingStatus statusFilter,
 			@QueryParam("page") @DefaultValue("1") int page, @QueryParam("size") @DefaultValue("10") int size) {
-		VotingService service = (VotingService) servletContext.getAttribute(WebConstants.ATTR_VOTING_SERVICE);
+
+		int validatedPage = Math.max(1, page);
+		int validatedSize = Math.max(1, size);
+
 		List<Voting> list = new ArrayList<>(service.findAll());
 
 		list.sort(Comparator.comparingLong(Voting::getId));
@@ -43,16 +44,19 @@ public class VotingListApi {
 		}
 
 		int totalItems = list.size();
-		int fromIndex = (page - 1) * size;
+		int fromIndex = (validatedPage - 1) * validatedSize;
 
-		if (fromIndex >= totalItems || fromIndex < 0 || size <= 0) {
-			PagedResponse<Voting> emptyResponse = new PagedResponse<>(new ArrayList<>(), totalItems, page, size);
+		if (fromIndex >= totalItems) {
+			PagedResponse<Voting> emptyResponse = new PagedResponse<>(new ArrayList<>(), totalItems, validatedPage,
+					validatedSize);
 			return Response.ok(emptyResponse).build();
 		}
 
-		int toIndex = Math.min(fromIndex + size, totalItems);
+		int toIndex = Math.min(fromIndex + validatedSize, totalItems);
 		List<Voting> paginatedList = list.subList(fromIndex, toIndex);
-		PagedResponse<Voting> pagedResponse = new PagedResponse<>(paginatedList, totalItems, page, size);
+
+		PagedResponse<Voting> pagedResponse = new PagedResponse<>(paginatedList, totalItems, validatedPage,
+				validatedSize);
 		return Response.ok(pagedResponse).build();
 	}
 }

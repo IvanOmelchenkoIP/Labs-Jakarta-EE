@@ -3,6 +3,7 @@ package controller.voting;
 import java.io.IOException;
 
 import controller.WebConstants;
+import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,12 +18,14 @@ public class VotingVoteServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
+    @EJB
+    private VotingService service;
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         long votingId = parseLong(request.getParameter("votingId"));
         long candidateId = parseLong(request.getParameter("candidateId"));
-        VotingService service = (VotingService) getServletContext().getAttribute(WebConstants.ATTR_VOTING_SERVICE);
 
         HttpSession session = request.getSession(true);
         
